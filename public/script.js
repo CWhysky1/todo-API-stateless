@@ -12,7 +12,8 @@ document.getElementById('displayTodos').addEventListener('click', async () => {
     const name = document.getElementById('todoName').value;
     const priority = document.getElementById('todoPriority').value || 'low';
     const isFun = document.getElementById('todoIsFun').value || 'true';
-  
+    
+    console.log("This should print in terminal")
     const todo = { name, priority, isFun };
   
     const response = await fetch('/todos', {
