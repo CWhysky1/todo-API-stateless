@@ -4,10 +4,10 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
-const PORT = process.env.PORT || 3000;
 const path = require('path');
-//const db = new sqlite3.Database('./mystore.sqlite');
 const db = require('./mytables')
+
+const PORT = process.env.PORT || 3000;
 
 let bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -19,20 +19,16 @@ app.use(express.json());
 // TODO ➡️  Middleware to inlcude static content from 'public' folder
 app.use( express.static(path.join(__dirname, 'public')))
 
-// In-memory array to store todo items
-//let todos = [];
-//let nextId = 1;
-
 // TODO ➡️ serve index.html from 'public' at the '/' path
 app.get('/', (req, res) =>{
     res.sendFile(path.join(__dirname, 'public/index.html'));
-    //res.render('index');
+
     console.log("so far so good");
 });
 
 // TODO ➡️ GET all todo items at the '/todos' path
 app.get('/todos', (req, res) => {
-  //let params = [];
+  
   db.all("SELECT * FROM Todo", [], (err, rows) => {
     if (err) {
       return res.status(500).json({ error: err.message });
