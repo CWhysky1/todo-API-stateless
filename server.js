@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 // TODO ➡️  Middleware to inlcude static content from 'public' folder
-app.use( express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'public')))
 
 // TODO ➡️ serve index.html from 'public' at the '/' path
 app.get('/', (req, res) =>{

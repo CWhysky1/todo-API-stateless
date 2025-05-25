@@ -1,9 +1,15 @@
 
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
-const DBSOURCE = path.join(__dirname, "mystore.sqlite");
 
-const db = new sqlite3.Database(DBSOURCE, (err) => {
+const isGlitch = process.env.PROJECT_DOMAIN !== undefined;
+const dbPath = isGlitch
+  ? path.join(__dirname, ".data", "mystore.sqlite")
+  : path.join(__dirname, "mystore.sqlite");
+
+//const DBSOURCE = path.join(__dirname, ".data", "mystore.sqlite");
+
+const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     return console.error("Error opening database:", err.message);
   }
