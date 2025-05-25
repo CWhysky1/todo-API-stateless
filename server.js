@@ -2,67 +2,73 @@
 // A simple Express.js backend for a Todo list API
 
 const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const PORT = 3000;
-const path = require('path')
+const path = require('path');
+//const db = new sqlite3.Database('./mystore.sqlite');
+const db = require('./mytables')
 
-const sqlite3 = require("sqlite3").verbose();
-
-// Create or open the 'animals.db' database.
-const db = new sqlite3.Database("./mystore.sqlite", (err) => {
-  if (err) {
-    return console.error("Error opening database:", err.message);
-  }
-  console.log("Connected to the store database.");
-});
-
-db.run(`
-  CREATE TABLE IF NOT EXISTS Todo (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    priority TEXT NOT NULL,
-    isComplete BOOLEAN,
-    isFun   BOOLEAN
-  )
-`, (err) => {
-  if (err) {
-    return console.error("Error creating table:", err.message);
-  }
-  console.log("Todo table created (if it didn't already exist).");
-});
-
-const insertQuery = `
-  INSERT INTO Todo (id, name, priority, isComplete, isFun)
-  VALUES (?, ?, ?, ?, ?)`;
-
+let bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // Middleware to parse JSON requests
 app.use(express.json());
 
 // TODO ➡️  Middleware to inlcude static content from 'public' folder
-
 app.use( express.static(path.join(__dirname, 'public')))
 
 // In-memory array to store todo items
-let todos = [];
-let nextId = 1;
+//let todos = [];
+//let nextId = 1;
 
 // TODO ➡️ serve index.html from 'public' at the '/' path
 app.get('/', (req, res) =>{
-    res.sendFile('index.html')
-})
+    res.sendFile(path.join(__dirname, 'public/index.html'));
+    //res.render('index');
+    console.log("so far so good");
+});
 
 // TODO ➡️ GET all todo items at the '/todos' path
-app.get('/', (req, res) => {
+app.get('/todos', (req, res) => {
+  //let params = [];
   db.all("SELECT * FROM Todo", [], (err, rows) => {
     if (err) {
-      return console.error("Error fetching data:", err.message);
+      return res.status(500).json({ error: err.message });
+      //return console.error("Error fetching data:", err.message);
     }
-    if (!row) {
+    if (!rows) {
       return res.status(404).json({ error: 'Todo not found' });
     }
     console.log("All Todos:", rows);
-    res.json(rows);
+
+    res.json({
+      "message":"success",
+      "data":rows
+    });
+  });
+});
+
+// POST a new todo item
+app.post('/todos', (req, res) => {
+
+  //const { id } = req.body;
+  const { name, priority, isFun } = req.body;
+
+  const insertQuery = `
+    INSERT INTO Todo (name, priority, isComplete, isFun)
+    VALUES (?, ?, ?, ?)`;
+
+  db.run(insertQuery, name, priority, false, isFun, function(err, result) {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(200).json({
+      id: this.lastID,
+      message: 'Todo added successfully',
+      name
+    });
   });
 });
 
@@ -70,37 +76,19 @@ app.get('/', (req, res) => {
 app.get('/todos/:id', (req, res) => {
   const id = parseInt(req.params.id);
   
-  db.get("SELECT * FROM Todo WHERE id = ?", (req.params.id), (err, rows) => {
+  db.get("SELECT * FROM Todo WHERE id = ?", [id], (err, rows) => {
     if (err) {
       return console.error("Error fetching data:", err.message);
       // TODO ➡️ handle 404 status with a message of { message: 'Todo item not found' }
-      res.status(404).json({message: 'Todo item not found' } )
+      res.status(500).json({error: err.message});
     }
+    if (!rows) {
+      return res.status(404).json({ message: 'Todo item not found' });
+    }
+
     console.log("Todos with the following id:", rows);
     res.json(rows);
 
-  });
-});
-
-// POST a new todo item
-app.post('/todo', (req, res) => {
-
-  const id = parseInt(req.body.id);
-  console.log("am I working");
-
-  // TODO ➡️ Log every incoming TODO item in a 
-  // 'todo.log' file @ the root of the project
-  // In your HW, you'd INSERT a row in your db table 
-  // instead of writing to file or push to array!
-  db.run(insertQuery, [req.body.id, req.body.name, req.body.isComplete = false, req.body.priority = low, req.body.isFun] , function(err) {
-
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.status(201).json({
-      id: this.lastID,
-      message: 'Todo added successfully'
-    });
   });
 });
 
@@ -124,5 +112,5 @@ app.delete('/todos/:id', (req, res) => {
 // Start the server
 // TODO ➡️ Start the server by listening on the specified PORT
 app.listen(PORT, () => {
-    console.log('listening: ')
+  console.log(`Server listening on port ${PORT}`);
 });
