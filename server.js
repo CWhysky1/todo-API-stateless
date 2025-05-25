@@ -60,7 +60,7 @@ app.post('/todos', (req, res) => {
     INSERT INTO Todo (name, priority, isComplete, isFun)
     VALUES (?, ?, ?, ?)`;
 
-  db.run(insertQuery, name, priority, false, isFun, function(err, result) {
+  db.run(insertQuery, [name, priority, false, isFun], function(err, result) {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
