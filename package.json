@@ -1,14 +1,14 @@
 {
   "name": "todo-api-stateless",
   "version": "1.0.0",
-  "description": "",
+  "description": "type node server.js on terminal to start sever",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18.x"
   },
   "repository": {
     "type": "git",
