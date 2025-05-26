@@ -1,5 +1,5 @@
 
-const sqlite3 = require("sqlite3").verbose();
+const Database = require("better-sqlite3");
 const path = require("path");
 
 const isGlitch = process.env.PROJECT_DOMAIN !== undefined;
@@ -9,15 +9,10 @@ const dbPath = isGlitch
 
 //const DBSOURCE = path.join(__dirname, ".data", "mystore.sqlite");
 
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    return console.error("Error opening database:", err.message);
-  }
-
-  console.log("Connected to the store database.");
-
-  db.serialize(() => {
-    db.run(`
+const db = new Database(dbPath)
+  
+try {
+    db.prepare(`
       CREATE TABLE IF NOT EXISTS Todo (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -25,13 +20,11 @@ const db = new sqlite3.Database(dbPath, (err) => {
         isComplete INTEGER DEFAULT 0,
         isFun INTEGER DEFAULT 0
       )
-    `, (err) => {
-      if (err) {
-        return console.error("Error creating Todo table:", err.message);
-      }
-      console.log("Todo table created (if it didn't already exist).");
-    });
-  });
-});
-
-module.exports = db;
+    `).run();
+  
+    console.log("Todo table created (if it didn't already exist).");
+  } catch (err) {
+    console.error("Error setting up the database:", err.message);
+  }
+  
+  module.exports = db;

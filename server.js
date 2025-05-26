@@ -2,10 +2,10 @@
 // A simple Express.js backend for a Todo list API
 
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('better-sqlite3');
 const app = express();
 const path = require('path');
-const db = require('./mytables')
+const db = require('./mytables');
 
 const PORT = process.env.PORT || 3000;
 
